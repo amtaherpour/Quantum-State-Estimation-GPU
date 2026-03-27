@@ -7,6 +7,7 @@ import torch
 
 from config import ExperimentConfig, LossConfig
 from confusion_solver import ConfusionUpdateResult, update_all_confusions
+from core_ops import frobenius_norm
 from measurements import POVM, validate_region_povm_collection
 from noise import (
     build_all_initial_confusions,
@@ -444,7 +445,7 @@ def solve_alternating(
 
         final_state_primal = float(state_result.final_primal_residual)
         final_state_dual = float(state_result.final_dual_residual)
-        final_state_max_overlap = float(state_result.final_state_max_overlap_residual)
+        final_state_max_overlap = float(state_result.final_max_overlap_residual)
         final_confusion_avg_pg_iters = float(confusion_result.average_pg_iters)
 
         history["objective"].append(float(current_objective))
@@ -571,7 +572,6 @@ def _self_test_fixed_point_identity_case() -> None:
 def _self_test_general_run() -> None:
     from config import make_default_experiment_config
     from simulator import simulate_experiment
-    from core_ops import frobenius_norm
 
     cfg = make_default_experiment_config()
     cfg.loss.name = "l2"
@@ -630,6 +630,4 @@ def run_self_tests(verbose: bool = True) -> None:
 
 
 if __name__ == "__main__":
-    from core_ops import frobenius_norm
-
     run_self_tests(verbose=True)
