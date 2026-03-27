@@ -544,9 +544,12 @@ def measurement_map_adjoint(
         M^*(w) = sum_m w_m E_m.
     """
     effects = povm.effects if isinstance(povm, POVM) else _effects_to_tuple(povm)
+    effect_dtype = effects[0].dtype
+    real_dtype = _real_dtype_for_complex(effect_dtype)
+
     weights_t = _as_torch_tensor(
         weights,
-        dtype=_real_dtype_for_complex(effects[0].dtype),
+        dtype=real_dtype,
         device=effects[0].device,
     ).reshape(-1)
 
@@ -556,7 +559,8 @@ def measurement_map_adjoint(
         )
 
     eff_stack = torch.stack(effects, dim=0)
-    out = torch.einsum("m,mij->ij", weights_t, eff_stack)
+    weights_complex = weights_t.to(dtype=effect_dtype)
+    out = torch.einsum("m,mij->ij", weights_complex, eff_stack)
     return hermitian_part(out)
 
 
